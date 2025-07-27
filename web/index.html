@@ -1,0 +1,192 @@
+<!-- web/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Recruiter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+    <style>
+        /* Custom styles for a more polished look */
+        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-600">Apex Recruiter</h1>
+            <p class="text-slate-500 mt-2">Your local, AI-powered recruitment toolkit.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="mb-8 border-b border-slate-200">
+            <nav class="flex -mb-px space-x-6" aria-label="Tabs">
+                <button onclick="changeTab('scoring')" class="tab-btn active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Keyword Scoring</button>
+                <button onclick="changeTab('ranking')" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Resume Ranking</button>
+                <button onclick="changeTab('qna')" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Job Fit Q&A</button>
+                <button onclick="changeTab('scheduler')" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Scheduler</button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <main>
+            <!-- Feature 1: Keyword Scoring -->
+            <div id="scoring" class="tab-content active">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Input Panel -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-4">1. Analyze a Single Resume</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="keywords-scoring" class="block text-sm font-medium text-slate-700">Job Keywords (comma-separated)</label>
+                                <input type="text" id="keywords-scoring" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="e.g., Python, Django, API, AWS">
+                            </div>
+                            <div>
+                                <label for="resume-scoring" class="block text-sm font-medium text-slate-700">Upload Resume (PDF, DOCX, TXT)</label>
+                                <input type="file" id="resume-scoring" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.docx,.txt">
+                            </div>
+                            <button onclick="handleScoring()" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                                Calculate Match Score
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Output Panel -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-4">Analysis Result</h2>
+                        <div id="scoring-loader" class="hidden justify-center items-center py-10"><div class="loader"></div></div>
+                        <div id="scoring-output">
+                            <p class="text-slate-500">Results will be displayed here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Resume Comparison & Ranking -->
+            <div id="ranking" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Input Panel -->
+                    <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-4">2. Rank Multiple Resumes</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="keywords-ranking" class="block text-sm font-medium text-slate-700">Shared Keywords</label>
+                                <input type="text" id="keywords-ranking" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm" placeholder="e.g., Java, Spring, Microservices">
+                            </div>
+                            <div>
+                                <label for="resumes-ranking" class="block text-sm font-medium text-slate-700">Upload Resumes (multi-select)</label>
+                                <input type="file" id="resumes-ranking" multiple class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            </div>
+                            <button onclick="handleRanking()" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition">
+                                Rank Candidates
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Output Panel -->
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-4">Candidate Ranking</h2>
+                        <div id="ranking-loader" class="hidden justify-center items-center py-10"><div class="loader"></div></div>
+                        <div id="ranking-output">
+                             <p class="text-slate-500">Ranked list will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: Job Fit Q&A -->
+            <div id="qna" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Input Panel -->
+                    <div class="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-2">3. Job Fit Q&A</h2>
+                        <div>
+                            <label for="qna-jd" class="block text-sm font-medium text-slate-700">Paste Job Description</label>
+                            <textarea id="qna-jd" rows="8" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm"></textarea>
+                        </div>
+                        <div>
+                            <label for="qna-resume" class="block text-sm font-medium text-slate-700">Paste Resume Text</label>
+                            <textarea id="qna-resume" rows="8" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm"></textarea>
+                        </div>
+                    </div>
+                    <!-- Chat Panel -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[600px]">
+                        <h2 class="text-2xl font-semibold mb-4">Ask About Fit</h2>
+                        <div id="qna-chatbox" class="flex-grow bg-slate-50 rounded-md p-4 overflow-y-auto mb-4">
+                            <div class="text-slate-500 text-sm">Chat history will appear here...</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <input type="text" id="qna-question" class="flex-grow block w-full rounded-md border-slate-300 shadow-sm" placeholder="e.g., Which requirements are met?">
+                            <button onclick="handleQnA()" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700">Ask</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4: Interview Slot Scheduler -->
+            <div id="scheduler" class="tab-content">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Input Panel -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-4">4. Find Interview Slots</h2>
+                        <p class="text-sm text-slate-500 mb-4">Enter one date/time per line. Format: YYYY-MM-DD HH:MM (24h)</p>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="recruiter-slots" class="block text-sm font-medium text-slate-700">Recruiter's Available Slots</label>
+                                <textarea id="recruiter-slots" rows="5" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm" placeholder="2025-08-15 09:00&#10;2025-08-15 10:00"></textarea>
+                            </div>
+                            <div>
+                                <label for="candidate-slots" class="block text-sm font-medium text-slate-700">Candidates' Preferred Slots</label>
+                                <textarea id="candidate-slots" rows="8" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm" placeholder="Candidate Name: John Doe&#10;2025-08-15 09:00&#10;2025-08-15 11:00&#10;&#10;Candidate Name: Jane Smith&#10;2025-08-15 10:00"></textarea>
+                            </div>
+                            <button onclick="handleScheduling()" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition">
+                                Generate Schedule
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Output Panel -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-semibold mb-4">Generated Schedule</h2>
+                        <div id="scheduler-loader" class="hidden justify-center items-center py-10"><div class="loader"></div></div>
+                        <div id="scheduler-output">
+                            <p class="text-slate-500">The optimal schedule will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="./app.js"></script>
+</body>
+</html>
